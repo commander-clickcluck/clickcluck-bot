@@ -1,0 +1,10 @@
+services:
+	-type:web
+	name:clickcluck-bot
+	env:python
+	bulidCommand:"pip install -r requirements.txt"
+	startcommand:"pyhton main.py"
+	autoDeploy:true
+	envVars:
+		-key:DISCORD_WEBHOOK
+		sync:false
