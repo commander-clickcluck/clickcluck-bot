@@ -1,31 +1,38 @@
-import requests
+import discord
 import os
+import re
 from dotenv import load_dotenv
 
 load_dotenv()
 
-WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK")
-STORE_ID = "clickclucksho-20" #Your Amazons Associate ID
+TOKEN = os.getenv("DISCORD_TOKEN")
+STORE_ID = os.getenv("AMAZON_STORE_ID")
 
-def generate_affiliate_link(product_url):
-    if "tag=" in product_url:
-        return product_url
-    joiner = "&" if "?" in product_url else "?"
-    return f"{product_url}{joiner}tag={STORE_ID}"
+intents = discord.Intents.default()
+intents.message_content = True
+client = discord.Client(intents=intents)
 
-def send_to_discord(message):
-    data={"content":message} 
-    response=requests.post(WEBHOOK_URL,json=data)
-    if response.status_code == 204: 
+AMAZON_REGEX = r"(https?://(?:www\.)?amazon\.[a-z\.]{2,6}/(?:[^ ]+))"
 
-        print("send_to_Discord!")
+def convert_to_affiliate_link(url):
+    if "tag=" in url:
+        return url  # already has tag
+    separator = "&" if "?" in url else "?"
+    return f"{url}{separator}tag={STORE_ID}"
 
-    else:
+@client.event
+async def on_ready():
+    print(f"Logged in as {client.user}")
 
-        print("Failed to send:{response.status_code}-{response.text}")
+@client.event
+async def on_message(message):
+    if message.author == client.user:
+        return
 
-if __name__=="__main__":
-    product_link = input("Paste Amazon product URL:").strip()
-    affiliate_link = generate_affiliate_link(product_link)
-    send_to_discord(f"**Deal of the day**{affiliate_link}")
+    matches = re.findall(AMAZON_REGEX, message.content)
+    if matches:
+        for url in matches:
+            affiliate_link = convert_to_affiliate_link(url)
+            await message.channel.send(f"Affiliate link: {affiliate_link}")
 
+client.run(TOKEN)
