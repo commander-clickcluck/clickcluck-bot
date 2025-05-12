@@ -5,7 +5,7 @@ import os
 
 # Load environment variables from .env file
 load_dotenv()
-TOKEN = os.getenv("DISCORD_TOKEN")
+TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 
 # Set up the necessary intents
 intents = discord.Intents.default()
