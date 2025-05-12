@@ -1,22 +1,30 @@
 import discord
-import os
+from discord.ext import commands
 from dotenv import load_dotenv
+import os
 
-# Load environment variables from the .env file
 load_dotenv()
+TOKEN = os.getenv("DISCORD_BOT_TOKEN")
+AFFILIATE_TAG = os.getenv("AMAZON_ASSOCIATE_TAG")
 
-# Get the token from the environment variable
-TOKEN = os.getenv('TOKEN')
+intents = discord.Intents.default()
+bot = commands.Bot(command_prefix="!", intents=intents)
 
-# Check if the token is loaded correctly
-if TOKEN is None:
-    raise ValueError("No token found. Please set the token in your .env file.")
-
-# Initialize the client
-client = discord.Client()
-
-@client.event
+@bot.event
 async def on_ready():
-    print(f'Logged in as {client.user}')
+    print(f"Logged in as {bot.user}")
 
-client.run(TOKEN)
+@bot.command()
+async def affiliate(ctx, *, url: str):
+    if "amazon." not in url:
+        await ctx.send("Please provide a valid Amazon link.")
+        return
+
+    if "tag=" in url:
+        await ctx.send("Affiliate link already exists.")
+    else:
+        sep = "&" if "?" in url else "?"
+        affiliate_link = f"{url}{sep}tag={AFFILIATE_TAG}"
+        await ctx.send(f"Affiliate link: {affiliate_link}")
+
+bot.run(TOKEN)
