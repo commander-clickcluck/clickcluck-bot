@@ -1,5 +1,28 @@
-$ python main.py
-[2025-05-12 13:40:57] [WARNING ] discord.ext.commands.bot: Privileged message content intent is missing, commands may not work as expected.
-[2025-05-12 13:40:57] [INFO    ] discord.client: logging in using static token
-[2025-05-12 13:40:58] [INFO    ] discord.gateway: Shard ID None has connected to Gateway (Session ID: 206df3f266245354a4ade318168cce75).
-[2025-05-12 13:41:59] [INFO    ] discord.gateway: Shard ID None has successfully RESUMED session 206df3f266245354a4ade318168cce75.
+import discord
+from discord.ext import commands
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
+TOKEN = os.getenv("DISCORD_TOKEN")
+
+# Set up the necessary intents
+intents = discord.Intents.default()
+intents.message_content = True  # This is required to read message content
+
+# Create the bot with a command prefix and intents
+bot = commands.Bot(command_prefix="!", intents=intents)
+
+# Event: when the bot is ready
+@bot.event
+async def on_ready():
+    print(f"Logged in as {bot.user}")
+
+# Example command: ping
+@bot.command()
+async def ping(ctx):
+    await ctx.send("Pong!")
+
+# Run the bot
+bot.run(TOKEN)
